@@ -31,22 +31,73 @@ function fetchEmployees() {
 
 // TODO
 // add event listener to submit button
+document.getElementById('employeeForm').addEventListener('submit',function(event){
+  createEmployee()
+});
 
 // TODO
 // add event listener to delete button
+document.getElementById('dataTable').addEventListener('click', function(event) {
+  if (event.target.tagName === 'BUTTON') {
+      deleteEmployee(event.target);
+    }
+});
 
 // TODO
 function createEmployee (){
+  console.log(" Debug: createEmployee() function called");
   // get data from input field
+  const id=document.getElementById('id').value;
+  const name=document.getElementById('name').value;
+  console.log("id",id);
+  console.log("name",name);
+
   // send data to BE
+  fetch('http://localhost:3000/api/v1/employee', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ id, name }), 
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log("Backend Response:", data); 
   // call fetchEmployees
+      fetchEmployees(); 
+    })
+    .catch(error => console.error('Error creating employee:', error))
+
 }
 
+
 // TODO
-function deleteEmployee (){
+function deleteEmployee(button) {
+  if (!button) return console.error('Error: No button found');
   // get id
   // send id to BE
-  // call fetchEmployees
+  const row = button.closest('tr');
+  if (!row) return console.error('Error: Row not found');
+
+  const id = row.cells[0].textContent.trim();
+  if (!id) return console.error('Error: Employee ID not found');
+
+  console.log("Debug: deleteEmployee() called for ID:", id);
+
+  fetch(`http://localhost:3000/api/v1/employee/${id}`, { 
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then(response => response.json())
+    .then(() => {
+      console.log('Employee deleted successfully');
+      // call fetchEmployees
+      fetchEmployees();
+    })
+    .catch(error => console.error('Error deleting employee:', error));
 }
+
 
 fetchEmployees()
